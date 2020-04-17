@@ -1,33 +1,35 @@
 import requests
+import hashlib
 from subprocess import check_output
 
 
-def download_file(url, path):
+def download_file(url, path, dohash):
     local_filename = url.split('/')[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(f'{path}{local_filename}', 'wb') as f:
+        sha = hashlib.sha256()
+        with open(f'{path}{local_filename}', 'wb+') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
+                    sha.update(chunk)
+        if dohash:
+            print(sha.hexdigest())
     
     return local_filename
 
-def download_check(name):
-    sha_pub = check_output(["cat", f"/tmp/{name}.sha"])
-    sha_check = check_output(["sha256sum", f"/tmp/{name}.tar.gz"])
-    print(sha_pub)
-    print(sha_check)
+
+def download_package(url, name, dohash): 
+    print(f"Downloading {name} from {url}")
+    download_file(f"{url}{name}.tar.gz", "/tmp/", True)
+    print(f"Done downloading {name}")
+
+def download_list(url): 
+    print(f"Downloading list from {url}")
+    download_file(f"{url}/list", "/home/jake/.local/share/impulse/", False)
+    print("Done downloading list")
 
 
-def download_package(url, name): 
-    download_file(f"{url}{name}.tar.gz", "/tmp/")
-    download_file(f"{url}{name}.sha", "/tmp/")
-    download_check(name)
-
-
-_url = "https://jr0.org/impulse/"
-_name = "rushnote"
-
-download_package(_url, _name)
+download_package("https://jr0.org/impulse/", "rushnote", True)
+download_list("https://jr0.org/impulse/")
 
