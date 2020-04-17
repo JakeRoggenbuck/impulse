@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+from subprocess import check_output
+from termcolor import colored
+import requests
+import hashlib
+import json
+import sys
+
+
+def download_file(url, path, dohash):
+    local_filename = url.split('/')[-1]
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        sha = hashlib.sha256()
+        with open(f'{path}{local_filename}', 'wb+') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+                    sha.update(chunk)
+        if dohash:
+            print(sha.hexdigest())
+    
+    return local_filename
+
+
+def download_package(url, name, dohash): 
+    print(f"Downloading {name} from {url}")
+    download_file(f"{url}{name}.tar.gz", "/tmp/", True)
+    print(colored(f"Done downloading {name}", 'green'))
+
+
+def download_list(url): 
+    print(f"Downloading list from {url}")
+    download_file(f"{url}list.json", "/home/jake/.local/share/impulse/", False)
+    print(colored("Done downloading list", 'green'))
+
+
+def search_list(term):
+    with open("/home/jake/.local/share/impulse/list.json") as json_file:
+        data = json.load(json_file)
+        if term in data:
+            print(data[term]["name"])
+            print(f'-- {data[term]["desc"]}')
+
+
+if sys.argv[1] == "-U":
+   download_list("https://jr0.org/impulse/") 
+
+if sys.argv[1] == "-S":
+    download_package("https://jr0.org/impulse/", sys.argv[2], True)
+
+if sys.argv[1] == "-Ss":
+    search_list(sys.argv[2])
+
