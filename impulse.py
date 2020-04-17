@@ -1,8 +1,8 @@
-
 from subprocess import check_output
 import requests
 import hashlib
 import json
+import sys
 
 
 def download_file(url, path, dohash):
@@ -41,6 +41,11 @@ def search_list(term):
             print(f'-- {data[term]["desc"]}')
 
 
-download_package("https://jr0.org/impulse/", "rushnote", True)
-download_list("https://jr0.org/impulse/")
-search_list("test")
+if sys.argv[1] == "-U":
+   download_list("https://jr0.org/impulse/") 
+
+if sys.argv[1] == "-S":
+    download_package("https://jr0.org/impulse/", sys.argv[2], True)
+
+if sys.argv[1] == "-Ss":
+    search_list("test")
