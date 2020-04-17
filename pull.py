@@ -1,6 +1,8 @@
+
+from subprocess import check_output
 import requests
 import hashlib
-from subprocess import check_output
+import json
 
 
 def download_file(url, path, dohash):
@@ -24,12 +26,21 @@ def download_package(url, name, dohash):
     download_file(f"{url}{name}.tar.gz", "/tmp/", True)
     print(f"Done downloading {name}")
 
+
 def download_list(url): 
     print(f"Downloading list from {url}")
-    download_file(f"{url}/list", "/home/jake/.local/share/impulse/", False)
+    download_file(f"{url}list.json", "/home/jake/.local/share/impulse/", False)
     print("Done downloading list")
+
+
+def search_list(term):
+    with open("/home/jake/.local/share/impulse/list.json") as json_file:
+        data = json.load(json_file)
+        if term in data:
+            print(data[term]["name"])
+            print(f'-- {data[term]["desc"]}')
 
 
 download_package("https://jr0.org/impulse/", "rushnote", True)
 download_list("https://jr0.org/impulse/")
-
+search_list("test")
