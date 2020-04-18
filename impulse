@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from subprocess import check_output
+from subprocess import check_output, run
 from termcolor import colored
 from pathlib import Path
 import requests
@@ -29,11 +29,19 @@ def download_file(url, path, dohash):
     return local_filename
 
 
+def install_package(name):
+    run(["sudo", "mkdir", f"/tmp/{name}"])
+    run(["sudo", "tar", "-xvf", f"/tmp/{name}.tar.gz", "-C", f"/tmp/{name}"])
+    dir_ = check_output(["ls", f"/tmp/{name}/"])
+    run(["ls", f"/tmp/{name}/{dir_.decode('ascii').strip()}"])
+
 def download_package(url, name, dohash): 
     print(f"Downloading {name} from {url}")
     download_file(f"{url}{name}.tar.gz", "/tmp/", True)
     print(colored(f"Done downloading {name}", 'green'))
-
+    install_prompt = input(f"Do you want to install {name}? [y/n]")
+    if install_prompt == "y":
+        install_package(name)
 
 def download_list(url): 
     print(f"Downloading list from {url}")
