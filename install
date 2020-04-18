@@ -1,0 +1,10 @@
+user_=$(who | awk '{print $1}')
+cp impulse /bin/
+
+mkdir /home/$user_/.local/share/impulse
+mkdir /home/$user_/.config/impulse
+
+mv config.yaml /home/$user_/.config/impulse/
+
+cp impulse.1 /usr/share/man/man1/impulse.1
+gzip /usr/share/man/man1/impulse.1
