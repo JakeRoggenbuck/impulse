@@ -10,4 +10,4 @@ Edit the config the fit the upstream url and local path
 
 Add man page `cp impulse.1 /usr/share/man/man1/impulse.1`
 
-Then zip ir `gzip /usr/share/man/man1/impulse.1`
+Then zip it `gzip /usr/share/man/man1/impulse.1`
