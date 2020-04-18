@@ -24,22 +24,47 @@ def download_file(url, path, dohash):
                     f.write(chunk)
                     sha.update(chunk)
         if dohash:
-            print(sha.hexdigest())
+            print(f"sha256sum: {sha.hexdigest()}")
     
     return local_filename
 
 
 def install_package(name):
     run(["sudo", "mkdir", f"/tmp/{name}"])
-    run(["sudo", "tar", "-xvf", f"/tmp/{name}.tar.gz", "-C", f"/tmp/{name}"])
+    print("Extracting archive...")
+    extract = run(["sudo", "tar", "-xvf", f"/tmp/{name}.tar.gz", "-C", f"/tmp/{name}"])
+    extract_status = extract.returncode
+    if extract_status:
+        print(colored("Error extracting archive!", 'red'))
+        exit()
+    else:
+        print(colored("Extracted!", 'green'))
+
     dir_ = check_output(["ls", f"/tmp/{name}/"])
-    run(["sudo", "sh", f"/tmp/{name}/{dir_.decode('ascii').strip()}/impulse.build"])
+    view_diff = input("View impulse.build diff? [y/n] ")
+    if view_diff == "y":
+        diff = run(["less", f"/tmp/{name}/{dir_.decode('ascii').strip()}/impulse.build"])
+        diff_status = diff.returncode
+        if diff_status:
+            print(colored("Installation file doesn't exist!", 'red'))
+            exit()
+        else:
+            pass
+
+    continue_install = input("Continue install? [y/n] ")
+    if continue_install == "y":
+        install = run(["sudo", "sh", f"/tmp/{name}/{dir_.decode('ascii').strip()}/impulse.build"])
+        install_status = install.returncode
+        if install_status:
+            print(colored("Installation failed!", 'red'))
+        else:
+            print(colored("Installation complete!", 'green'))
 
 def download_package(url, name, dohash): 
     print(f"Downloading {name} from {url}")
     download_file(f"{url}{name}.tar.gz", "/tmp/", True)
-    print(colored(f"Done downloading {name}", 'green'))
-    install_prompt = input(f"Do you want to install {name}? [y/n]")
+    print(colored(f"Done downloading {name}!", 'green'))
+    install_prompt = input(f"Do you want to install {name}? [y/n] ")
     if install_prompt == "y":
         install_package(name)
 
