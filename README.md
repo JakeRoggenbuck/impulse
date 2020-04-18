@@ -1,7 +1,7 @@
 # impulse
 
 # Install
-Run `./install` with root permissions
+Run `./impulse.build` with root permissions
 
 # Use
 Read the man page
