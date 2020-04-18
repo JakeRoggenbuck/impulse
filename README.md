@@ -1,7 +1,7 @@
 # impulse
 
 # Install
-Run `./install`
+Run `./install` with root permissions
 
 # Use
 Read the man page
