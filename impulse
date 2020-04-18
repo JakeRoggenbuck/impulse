@@ -4,9 +4,13 @@ from subprocess import check_output
 from termcolor import colored
 import requests
 import hashlib
+import yaml
 import json
 import sys
 
+
+with open('config.yaml') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
 
 def download_file(url, path, dohash):
     local_filename = url.split('/')[-1]
@@ -32,12 +36,12 @@ def download_package(url, name, dohash):
 
 def download_list(url): 
     print(f"Downloading list from {url}")
-    download_file(f"{url}list.json", "/home/jake/.local/share/impulse/", False)
+    download_file(f"{url}list.json", config["local_path"], False)
     print(colored("Done downloading list", 'green'))
 
 
 def search_list(term):
-    with open("/home/jake/.local/share/impulse/list.json") as json_file:
+    with open(f"{config['local_path']}list.json") as json_file:
         data = json.load(json_file)
         if term in data:
             print(data[term]["name"])
@@ -45,10 +49,10 @@ def search_list(term):
 
 
 if sys.argv[1] == "-U":
-   download_list("https://jr0.org/impulse/") 
+   download_list(config["upstream"]) 
 
 if sys.argv[1] == "-S":
-    download_package("https://jr0.org/impulse/", sys.argv[2], True)
+    download_package(config["upstream"], sys.argv[2], True)
 
 if sys.argv[1] == "-Ss":
     search_list(sys.argv[2])
