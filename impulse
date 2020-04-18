@@ -2,6 +2,7 @@
 
 from subprocess import check_output
 from termcolor import colored
+from pathlib import Path
 import requests
 import hashlib
 import yaml
@@ -9,7 +10,7 @@ import json
 import sys
 
 
-with open('config.yaml') as f:
+with open(f'{str(Path.home())}/.config/impulse/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 def download_file(url, path, dohash):
@@ -36,12 +37,12 @@ def download_package(url, name, dohash):
 
 def download_list(url): 
     print(f"Downloading list from {url}")
-    download_file(f"{url}list.json", config["local_path"], False)
+    download_file(f"{url}list.json", f'{str(Path.home())}{config["local_path"]}', False)
     print(colored("Done downloading list", 'green'))
 
 
 def search_list(term):
-    with open(f"{config['local_path']}list.json") as json_file:
+    with open(f"{str(Path.home())}{config['local_path']}list.json") as json_file:
         data = json.load(json_file)
         if term in data:
             print(data[term]["name"])

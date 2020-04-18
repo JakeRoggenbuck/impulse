@@ -1,2 +1,2 @@
 upstream: "https://jr0.org/impulse/"
-local_path: "/home/jake/.local/share/impulse/"
+local_path: "/.local/share/impulse/"
