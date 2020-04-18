@@ -33,7 +33,7 @@ def install_package(name):
     run(["sudo", "mkdir", f"/tmp/{name}"])
     run(["sudo", "tar", "-xvf", f"/tmp/{name}.tar.gz", "-C", f"/tmp/{name}"])
     dir_ = check_output(["ls", f"/tmp/{name}/"])
-    run(["ls", f"/tmp/{name}/{dir_.decode('ascii').strip()}"])
+    run(["sudo", "sh", f"/tmp/{name}/{dir_.decode('ascii').strip()}/impulse.build"])
 
 def download_package(url, name, dohash): 
     print(f"Downloading {name} from {url}")
