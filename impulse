@@ -7,6 +7,7 @@ import hashlib
 import yaml
 import json
 import sys
+import os
 
 
 with open(f'{str(Path.home())}/.config/impulse/config.yaml') as f:
@@ -50,7 +51,8 @@ def install_package(name):
 
     continue_install = input("Continue install? [y/n] ")
     if continue_install == "y":
-        install = run(["sudo", "sh", f"/tmp/{name}/{dir_.decode('ascii').strip()}/impulse.build"]).returncode
+        os.chdir(f"/tmp/{name}/{dir_.decode('ascii').strip()}/")
+        install = run(["sudo", "sh", "impulse.build"]).returncode
         if install:
             print(colored("Installation failed!", 'red'))
         else:
