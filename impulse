@@ -77,6 +77,11 @@ def download_list(url):
 def search_list(term):
     with open(f"{str(Path.home())}{config['local_path']}list.json") as json_file:
         data = json.load(json_file)
+        if term == 'a':
+            print("Here are the packages that can be installed.",
+            "\nUse -Ss <package-name> to learn more about a package\n")
+            for entry in data:
+                print(f"* {entry}")
         if term in data:
             print(data[term]["name"])
             print(f'-- {data[term]["desc"]}')
@@ -91,3 +96,5 @@ if sys.argv[1] == "-S":
 if sys.argv[1] == "-Ss":
     search_list(sys.argv[2])
 
+else:
+    print("Not a command, use the man page")
