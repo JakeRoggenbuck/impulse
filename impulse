@@ -90,10 +90,10 @@ def search_list(term):
 if sys.argv[1] == "-U":
    download_list(config["upstream"]) 
 
-if sys.argv[1] == "-S":
+elif sys.argv[1] == "-S":
     download_package(config["upstream"], sys.argv[2], True)
 
-if sys.argv[1] == "-Ss":
+elif sys.argv[1] == "-Ss":
     search_list(sys.argv[2])
 
 else:
