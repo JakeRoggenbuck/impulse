@@ -1,14 +1,14 @@
 #!/usr/bin/python3
-from subprocess import check_output, run
-from termcolor import colored
-from pathlib import Path
-from tqdm import tqdm
-import requests
 import hashlib
-import yaml
 import json
-import sys
 import os
+from pathlib import Path
+import requests
+from subprocess import check_output, run
+import sys
+from termcolor import colored
+from tqdm import tqdm
+import yaml
 
 
 with open(f"{str(Path.home())}/.config/impulse/config.yaml") as f:
