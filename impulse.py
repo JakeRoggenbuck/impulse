@@ -8,14 +8,14 @@ from subprocess import check_output, run
 import sys
 from termcolor import colored
 from tqdm import tqdm
-import yaml
+from jakesutils.config import Config
 
 
-with open(f"{str(Path.home())}/.config/impulse/config.yaml") as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
+HOME_PATH = str(Path.home())
+CONFIG = Config(f"{HOME_PATH}/.config/impulse/config.yaml", "yaml").config
 
 
-def download_file(url, path, dohash):
+def download_file(url: str, path: str, dohash: bool = True):
     local_filename = url.split("/")[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -27,55 +27,68 @@ def download_file(url, path, dohash):
                     sha.update(chunk)
         if dohash:
             print(f"sha256sum: {sha.hexdigest()}")
-    return local_filename
 
 
-def install_package(name):
-    run(["sudo", "mkdir", f"/tmp/{name}"])
-    print("Extracting archive...")
-    if run(
-        ["sudo", "tar", "-xvf", f"/tmp/{name}.tar.gz", "-C", f"/tmp/{name}"]
-    ).returncode:
-        print(colored("Error extracting archive!", "red"))
-        exit()
-    else:
-        print(colored("Extracted!", "green"))
+class PackageInstaller:
+    def __init__(self, name: str):
+        self.name = name
 
-    dir_ = check_output(["ls", f"/tmp/{name}/"])
-    if input("View impulse.build diff? [y/n] ") == "y":
-        if run(
-            ["less", f"/tmp/{name}/{dir_.decode('ascii').strip()}/impulse.build"]
-        ).returncode:
+    def make_temp_dir(self):
+        run(["sudo", "mkdir", f"/tmp/{self.name}"])
+
+    def extract_tar(self):
+        try:
+            run(["sudo", "tar", "-xvf", f"/tmp/{self.name}.tar.gz", "-C", f"/tmp/{self.name}"])
+            print(colored("Extracted!", "green"))
+        except:
+            print(colored("Error extracting archive!", "red"))
+
+    def get_sub_temp_dir(self):
+        self.sub_temp_dir = check_output(["ls", f"/tmp/{self.name}/"]).decode('ascii').strip()
+
+    def show_diff(self):
+        try:
+            run(["less", f"/tmp/{self.name}/{self.sub_temp_dir}/impulse.build"])
+        except:
             print(colored("Installation file doesn't exist!", "red"))
-            exit()
-        else:
-            pass
 
-    if input("Continue install? [y/n] ") == "y":
-        os.chdir(f"/tmp/{name}/{dir_.decode('ascii').strip()}/")
-        if run(["sudo", "sh", "impulse.build"]).returncode:
-            print(colored("Installation failed!", "red"))
-        else:
+    def run_install(self):
+        try:
+            os.chdir(f"/tmp/{self.name}/{self.sub_temp_dir}/")
             print(colored("Installation complete!", "green"))
+        except:
+            print(colored("Installation failed!", "red"))
+
+    def install_package(self):
+        self.make_temp_dir()
+
+        print("Extracting archive...")
+        self.extract_tar()
+        self.get_sub_temp_dir()
+
+        if input("View impulse.build diff? [y/n] ").lower() == "y":
+            self.show_diff()
+        if input("Continue install? [y/n] ").lower() == "y":
+            self.run_install()
 
 
-def download_package(url, name, dohash):
+def download_package(url: str, name: str):
     print(f"Downloading {name} from {url}")
-    download_file(f"{url}{name}.tar.gz", "/tmp/", True)
+    download_file(f"{url}{name}.tar.gz", "/tmp/")
     print(colored(f"Done downloading {name}!", "green"))
-    install_prompt = input(f"Do you want to install {name}? [y/n] ")
-    if install_prompt == "y":
-        install_package(name)
+    if input(f"Do you want to install {name}? [y/n] ").lower() == "y":
+        package_installer = PackageInstaller(name)
+        package_installer.install_package()
 
 
-def download_list(url):
+def download_list(url: str):
     print(f"Downloading list from {url}")
-    download_file(f"{url}list.json", f'{str(Path.home())}{config["local_path"]}', False)
+    download_file(f"{url}list.json", f'{HOME_PATH}{CONFIG["local_path"]}', False)
     print(colored("Done downloading list", "green"))
 
 
-def search_list(term):
-    with open(f"{str(Path.home())}{config['local_path']}list.json") as json_file:
+def search_list(term: str):
+    with open(f"{HOME_PATH}{CONFIG['local_path']}list.json") as json_file:
         data = json.load(json_file)
         if term == "a":
             print(
@@ -90,10 +103,10 @@ def search_list(term):
 
 
 if sys.argv[1] == "-U":
-    download_list(config["upstream"])
+    download_list(CONFIG["upstream"])
 
 elif sys.argv[1] == "-S":
-    download_package(config["upstream"], sys.argv[2], True)
+    download_package(CONFIG["upstream"], sys.argv[2])
 
 elif sys.argv[1] == "-Ss":
     search_list(sys.argv[2])
