@@ -17,6 +17,7 @@ CONFIG = Config(f"{HOME_PATH}/.config/impulse/config.yaml", "yaml").config
 
 
 def download_file(url: str, path: str, dohash: bool = True):
+    """Download raw files, used for the tar.gz and the package list"""
     local_filename = url.split("/")[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -31,6 +32,7 @@ def download_file(url: str, path: str, dohash: bool = True):
 
 
 class PackageInstaller:
+    """Download, extract and install packages from the tar.gz"""
     def __init__(self, name: str):
         self.name = name
 
@@ -54,8 +56,9 @@ class PackageInstaller:
             print(colored("Installation file doesn't exist!", "red"))
 
     def run_install(self):
+        os.chdir(f"/tmp/{self.name}/{self.sub_temp_dir}/")
         try:
-            os.chdir(f"/tmp/{self.name}/{self.sub_temp_dir}/")
+            run(["sudo", "sh", "impulse.build"])
             print(colored("Installation complete!", "green"))
         except:
             print(colored("Installation failed!", "red"))
@@ -74,6 +77,7 @@ class PackageInstaller:
 
 
 def download_package(url: str, name: str):
+    """Download a package from the url and the name"""
     print(f"Downloading {name} from {url}")
     download_file(f"{url}{name}.tar.gz", "/tmp/")
     print(colored(f"Done downloading {name}!", "green"))
@@ -83,12 +87,15 @@ def download_package(url: str, name: str):
 
 
 def download_list(url: str):
+    """Download the package list from a url"""
     print(f"Downloading list from {url}")
     download_file(f"{url}list.json", f'{HOME_PATH}{CONFIG["local_path"]}', False)
     print(colored("Done downloading list", "green"))
 
 
 def search_list(term: str):
+    """Print a match to a search term from the packages"""
+    # TODO: Clean this up and make it work efficiently
     with open(f"{HOME_PATH}{CONFIG['local_path']}list.json") as json_file:
         data = json.load(json_file)
         if term == "a":
