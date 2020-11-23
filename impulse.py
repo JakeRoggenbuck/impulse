@@ -1,5 +1,7 @@
 #!/usr/bin/python3
+import argparse
 import hashlib
+from jakesutils.config import Config
 import json
 import os
 from pathlib import Path
@@ -8,7 +10,6 @@ from subprocess import check_output, run
 import sys
 from termcolor import colored
 from tqdm import tqdm
-from jakesutils.config import Config
 
 
 HOME_PATH = str(Path.home())
@@ -102,14 +103,22 @@ def search_list(term: str):
             print(f'-- {data[term]["desc"]}')
 
 
-if sys.argv[1] == "-U":
-    download_list(CONFIG["upstream"])
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-U", "--update", help="Update package database", action="store_true")
+    parser.add_argument("-S", "--install", help="Install package")
+    parser.add_argument("-Ss", "--search", help="Search package")
+    args = parser.parse_args()
+    return args
 
-elif sys.argv[1] == "-S":
-    download_package(CONFIG["upstream"], sys.argv[2])
 
-elif sys.argv[1] == "-Ss":
-    search_list(sys.argv[2])
+if __name__ == "__main__":
+    args = parse_args()
+    if args.update:
+        download_list(CONFIG["upstream"])
 
-else:
-    print("Not a command, use the man page")
+    elif args.install:
+        download_package(CONFIG["upstream"], sys.argv[2])
+
+    elif args.search:
+        search_list(sys.argv[2])
